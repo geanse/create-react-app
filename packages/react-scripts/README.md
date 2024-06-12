@@ -23,6 +23,16 @@ This fork includes the following changes:
 3. **Proxying Requests in Development Mode:**
    - In development mode, all requests to `/widget/**/*` are proxied to the `/widget/**/*` path of the `webpack-dev-server` instance running with the `--widget` argument.
 
+Steps to publish to npm
+
+1. Update package.json version
+1. Run:
+
+   ```
+   $ npm login
+   $ npm publish
+   ```
+
 ---
 
 This package includes scripts and configuration used by [Create React App](https://github.com/facebook/create-react-app).<br>

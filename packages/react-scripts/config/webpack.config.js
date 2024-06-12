@@ -87,6 +87,8 @@ const hasJsxRuntime = (() => {
   }
 })();
 
+const widgetConfigFactory = require('./webpackWidget.config');
+
 // This is the production and development configuration.
 // It is focused on developer experience, fast rebuilds, and a minimal bundle.
 module.exports = function (webpackEnv) {
@@ -168,7 +170,7 @@ module.exports = function (webpackEnv) {
     return loaders;
   };
 
-  return {
+  const config = {
     mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
     // Stop compilation early in production
     bail: isEnvProduction,
@@ -795,4 +797,8 @@ module.exports = function (webpackEnv) {
     // our own hints via the FileSizeReporter
     performance: false,
   };
+
+  const widgetConfig = widgetConfigFactory(webpackEnv);
+
+  return [widgetConfig, config];
 };

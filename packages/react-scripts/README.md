@@ -23,7 +23,7 @@ This fork includes the following changes:
 3. **Proxying Requests in Development Mode:**
    - In development mode, all requests to `/widget/**/*` are proxied to the `/widget/**/*` path of the `webpack-dev-server` instance running with the `--widget` argument.
 
-Steps to publish to npm
+### Steps to publish to npm
 
 1. Update package.json version
 1. Run:
@@ -32,6 +32,18 @@ Steps to publish to npm
    $ npm login
    $ npm publish
    ```
+
+### Troubleshooting
+
+- [Uncaught ReferenceError: process is not defined](https://github.com/facebook/create-react-app/issues/12374)
+
+  Latest versions of `react-error-overlay` have that bug. Add the following to your `package.json` to fix it:
+
+  ```json
+  "resolutions": {
+    "react-error-overlay": "6.0.8"
+  },
+  ```
 
 ---
 

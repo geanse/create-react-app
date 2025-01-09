@@ -12,9 +12,11 @@ This fork includes the following changes:
    - The new webpack configuration accepts the following environment variables:
      - `WIDGET_PUBLIC_URL` (similar to `PUBLIC_URL`): Defaults to `"/widget/"`.
      - `WIDGET_BUILD_PATH` (similar to `BUILD_PATH`): Defaults to `"build/widget"`.
+   - The output is a UMD module, named after the `name` field in the project's `package.json` file when using CRA.
 
 2. **Development Mode Enhancements:**
 
+   - Dev server has CORS enabled
    - You can pass a new argument `--widget` to the `start` script in development mode.
    - When the `--widget` argument is passed, `webpack-dev-server` uses the new webpack configuration.
    - `webpack-dev-server` accepts the following environment variable:

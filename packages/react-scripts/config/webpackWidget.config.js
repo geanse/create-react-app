@@ -238,10 +238,7 @@ module.exports = function(webpackEnv) {
       // this defaults to 'window', but by setting it to 'this' then
       // module chunks which are built will work in web workers as well.
       globalObject: 'this',
-      // UMD output configuration
-      library: appPackageJson.name,
-      libraryTarget: 'umd',
-      umdNamedDefine: true
+      libraryTarget: 'system'
     },
     optimization: {
       minimize: isEnvProduction,

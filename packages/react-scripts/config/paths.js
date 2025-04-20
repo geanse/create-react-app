@@ -28,8 +28,17 @@ const publicUrlOrPath = getPublicUrlOrPath(
   require(resolveApp('package.json')).homepage,
   process.env.PUBLIC_URL
 );
+let widgetPublicUrlOrPath = getPublicUrlOrPath(
+  process.env.NODE_ENV === 'development',
+  require(resolveApp('package.json')).widgetHomepage,
+  process.env.WIDGET_PUBLIC_URL
+);
+if (widgetPublicUrlOrPath === '/') {
+  widgetPublicUrlOrPath = '/widget/';
+}
 
 const buildPath = process.env.BUILD_PATH || 'build';
+const widgetBuildPath = process.env.WIDGET_BUILD_PATH || 'build/widget';
 
 const moduleFileExtensions = [
   'web.mjs',
@@ -61,6 +70,9 @@ const resolveModule = (resolveFn, filePath) => {
 // config after eject: we're in ./config/
 module.exports = {
   dotenv: resolveApp('.env'),
+  widgetBuild: resolveApp(widgetBuildPath),
+  widgetIndexJs: resolveModule(resolveApp, 'src/widget'),
+  widgetPublicUrlOrPath,
   appPath: resolveApp('.'),
   appBuild: resolveApp(buildPath),
   appPublic: resolveApp('public'),
@@ -84,6 +96,9 @@ const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
 // config before eject: we're in ./node_modules/react-scripts/config/
 module.exports = {
   dotenv: resolveApp('.env'),
+  widgetBuild: resolveApp(widgetBuildPath),
+  widgetIndexJs: resolveModule(resolveApp, 'src/widget'),
+  widgetPublicUrlOrPath,
   appPath: resolveApp('.'),
   appBuild: resolveApp(buildPath),
   appPublic: resolveApp('public'),
@@ -120,6 +135,9 @@ if (
   const templatePath = '../cra-template/template';
   module.exports = {
     dotenv: resolveOwn(`${templatePath}/.env`),
+    widgetBuild: resolveApp(widgetBuildPath),
+    widgetIndexJs: resolveModule(resolveApp, 'src/widget'),
+    widgetPublicUrlOrPath,
     appPath: resolveApp('.'),
     appBuild: resolveOwn(path.join('../..', buildPath)),
     appPublic: resolveOwn(`${templatePath}/public`),

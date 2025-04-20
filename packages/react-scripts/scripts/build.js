@@ -64,7 +64,7 @@ const argv = process.argv.slice(2);
 const writeStatsJson = argv.indexOf('--stats') !== -1;
 
 // Generate configuration
-const config = configFactory('production');
+const configs = configFactory('production');
 
 // We require that you explicitly set browsers and do not fall back to
 // browserslist defaults.
@@ -73,7 +73,10 @@ checkBrowsers(paths.appPath, isInteractive)
   .then(() => {
     // First, read the current file sizes in build directory.
     // This lets us display how much they changed later.
-    return measureFileSizesBeforeBuild(paths.appBuild);
+    return Promise.all([
+      measureFileSizesBeforeBuild(paths.widgetBuild),
+      measureFileSizesBeforeBuild(paths.appBuild),
+    ]);
   })
   .then(previousFileSizes => {
     // Remove all content but keep the directory so that
@@ -104,26 +107,41 @@ checkBrowsers(paths.appPath, isInteractive)
       }
 
       console.log('File sizes after gzip:\n');
-      printFileSizesAfterBuild(
-        stats,
-        previousFileSizes,
-        paths.appBuild,
-        WARN_AFTER_BUNDLE_GZIP_SIZE,
-        WARN_AFTER_CHUNK_GZIP_SIZE
-      );
-      console.log();
+      for (const [index, stat] of stats.stats.entries()) {
+        let buildFolder = paths.appBuild;
+        if (index === 0) {
+          // widget config
+          buildFolder = paths.widgetBuild;
+        }
+        printFileSizesAfterBuild(
+          stat,
+          previousFileSizes[index],
+          buildFolder,
+          WARN_AFTER_BUNDLE_GZIP_SIZE,
+          WARN_AFTER_CHUNK_GZIP_SIZE
+        );
+        console.log();
+      }
 
-      const appPackage = require(paths.appPackageJson);
-      const publicUrl = paths.publicUrlOrPath;
-      const publicPath = config.output.publicPath;
-      const buildFolder = path.relative(process.cwd(), paths.appBuild);
-      printHostingInstructions(
-        appPackage,
-        publicUrl,
-        publicPath,
-        buildFolder,
-        useYarn
-      );
+      for (const [index, config] of configs.entries()) {
+        const appPackage = require(paths.appPackageJson);
+        let publicUrl = paths.publicUrlOrPath;
+        const publicPath = config.output.publicPath;
+        let buildFolder = path.relative(process.cwd(), paths.appBuild);
+        if (index === 0) {
+          // widget config
+          publicUrl = paths.widgetPublicUrlOrPath;
+          buildFolder = path.relative(process.cwd(), paths.widgetBuild);
+        }
+        printHostingInstructions(
+          appPackage,
+          publicUrl,
+          publicPath,
+          buildFolder,
+          useYarn
+        );
+        console.log();
+      }
     },
     err => {
       const tscCompileOnError = process.env.TSC_COMPILE_ON_ERROR === 'true';
@@ -152,7 +170,7 @@ checkBrowsers(paths.appPath, isInteractive)
 function build(previousFileSizes) {
   console.log('Creating an optimized production build...');
 
-  const compiler = webpack(config);
+  const compiler = webpack(configs);
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
       let messages;
@@ -210,7 +228,8 @@ function build(previousFileSizes) {
 
       if (writeStatsJson) {
         return bfj
-          .write(paths.appBuild + '/bundle-stats.json', stats.toJson())
+          .write(paths.widgetBuild + '/bundle-stats.json', stats[0].toJson())
+          .write(paths.appBuild + '/bundle-stats.json', stats[1].toJson())
           .then(() => resolve(resolveArgs))
           .catch(error => reject(new Error(error)));
       }
